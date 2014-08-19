@@ -1,0 +1,72 @@
+" let Vundle manage Vundle
+" required! 
+ " NeoBundle 'gmarik/vundle'
+
+ " Recommended to install
+ " After install, turn shell ~/.vim/bundle/vimproc, (n,g)make -f your_machines_makefile
+        NeoBundle 'Shougo/vimproc', {
+      \ 'build' : {
+      \     'windows' : 'make -f make_mingw32.mak',
+      \     'cygwin' : 'make -f make_cygwin.mak',
+      \     'mac' : 'make -f make_mac.mak',
+      \     'unix' : 'make -f make_unix.mak',
+      \    },
+      \ }
+" My NeoBundles here:
+
+NeoBundle 'git://github.com/markabe/bufexplorer.git'
+NeoBundle 'tomtom/tcomment_vim'
+NeoBundle 'vim-scripts/Figlet.vim'
+NeoBundle 'tpope/vim-unimpaired'
+NeoBundle 'git://github.com/xolox/vim-misc.git'
+NeoBundle 'git://github.com/xolox/vim-notes.git'
+NeoBundle 'git://github.com/vim-scripts/hexHighlight.vim.git'
+NeoBundle 'git://github.com/gerw/vim-HiLinkTrace.git'
+NeoBundle 'git://github.com/Shougo/unite.vim.git'
+NeoBundle 'jcf/vim-latex'
+NeoBundle 'altercation/vim-colors-solarized'
+NeoBundle 'tpope/vim-rails'
+NeoBundle 'tpope/vim-fugitive'
+" SnipMate {
+	NeoBundle "MarcWeber/vim-addon-mw-utils"
+	NeoBundle "tomtom/tlib_vim"
+	NeoBundle "garbas/vim-snipmate"
+	NeoBundle "honza/vim-snippets"
+" }
+NeoBundle 'mileszs/ack.vim'
+NeoBundle 'kien/ctrlp.vim'
+" NeoBundle 'godlygeek/tabular'
+" NeoBundle 'Lokaltog/vim-powerline'
+NeoBundle 'Lokaltog/vim-distinguished'
+NeoBundle 'majutsushi/tagbar'
+NeoBundle 'elixir-lang/vim-elixir'
+NeoBundle 'thinca/vim-quickrun'
+NeoBundle 'scrooloose/syntastic'
+NeoBundle 'vim-scripts/Conque-Shell'
+NeoBundle 'mattn/gist-vim'
+NeoBundle 'mattn/webapi-vim'
+NeoBundle 'LaTeX-Box-Team/LaTeX-Box'
+NeoBundle 'tpope/vim-surround'
+NeoBundle 'vim-scripts/ZoomWin'
+NeoBundle 'kchmck/vim-coffee-script'
+NeoBundle 'gregsexton/MatchTag'
+" various helpful bundles for javascript
+NeoBundle 'jelera/vim-javascript-syntax'
+NeoBundle 'pangloss/vim-javascript'
+NeoBundle 'nathanaelkane/vim-indent-guides'
+NeoBundle 'Raimondi/delimitMate'
+NeoBundle 'Valloric/YouCompleteMe'
+NeoBundle 'marijnh/tern_for_vim'
+NeoBundle 'endel/vim-github-colorscheme'
+NeoBundle 'koron/nyancat-vim'
+NeoBundle 'digitaltoad/vim-jade'
+NeoBundle 'moll/vim-node'
+NeoBundle 'tpope/vim-endwise'
+" NeoBundle 'tpope/vim-markdown'
+NeoBundle 'thoughtbot/vim-rspec'
+NeoBundle 'tpope/vim-dispatch'
+NeoBundle 'gabrielelana/vim-markdown'
+NeoBundle 'morhetz/gruvbox'
+NeoBundle 'kien/rainbow_parentheses.vim'
+NeoBundle 'fatih/vim-go'
+NeoBundle 'bling/vim-airline'
