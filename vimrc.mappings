@@ -6,6 +6,8 @@ let mapleader = " "
 " buffer management
 nnoremap <space>w :write<cr>
 nnoremap <leader>so :so ~/.vimrc<cr>
+" vim masterclass 
+xnoremap . :normal .<CR>
 " nnoremap <leader>m :!mocha -GC<cr>
 augroup filetype_javascript
     autocmd!
@@ -26,6 +28,7 @@ nnoremap <leader>l :bnext<cr>
 nnoremap <leader>j :bprev<cr>
 nnoremap <leader>d :bdelete<cr>
 nnoremap <space>o :only<cr>
+nnoremap <leader>b :BufExplorer<cr>
 
 " }
 " { Ack
