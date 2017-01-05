@@ -1,4 +1,5 @@
 " Bobby's  vimrc
+" test
 " Jul 12, 2015 10:08 AM
 
 if has("autocmd")
