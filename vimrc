@@ -1,5 +1,4 @@
 " Bobby's  vimrc
-" test
 " Jul 12, 2015 10:08 AM
 
 if has("autocmd")
@@ -11,6 +10,7 @@ endif
 " Plugins {{{
 " https://github.com/junegunn/vim-plug
 call plug#begin('~/.vim/plugged')
+Plug 'heavenshell/vim-jsdoc'
 Plug 'tpope/vim-fugitive'
 Plug 'tomtom/tcomment_vim'
 Plug 'Chiel92/vim-autoformat'
@@ -48,6 +48,11 @@ Plug 'vim-scripts/proton'
 Plug 'Lokaltog/vim-distinguished'
 Plug 'itspriddle/vim-marked'
 Plug 'junegunn/goyo.vim'
+Plug 'kien/ctrlp.vim'
+Plug 'moll/vim-bbye'
+Plug 'kristijanhusak/vim-hybrid-material'
+Plug 'morhetz/gruvbox'
+Plug 'millermedeiros/vim-esformatter'
 " command-t build function {{{
 function! BuildCommandT(info)
     echomsg "running commandt install function"
@@ -71,12 +76,14 @@ if ($TERM == "screen" || $TERM =~ "256")
     set t_Co=256 t_kb=
 endif
 
-colorscheme distinguished
+colorscheme gruvbox
+set background=dark
 if has('gui_running')
     set guioptions-=T           " Remove the toolbar
-    set background=dark
-    set guifont=Menlo\ for\ Powerline:h14
-    colorscheme anderson
+    " set guifont=Menlo\ for\ Powerline:h14
+    set guifont=Source\ Code\ Pro:h13
+    colorscheme gruvbox
+else
 endif
 "  }}}
 
@@ -92,10 +99,11 @@ let mapleader = ","
 "endif
 
 if has('folding')
-    set foldmethod=indent
+    set foldmethod=syntax
 endif
 
 set runtimepath+=/Users/rarnold/vim-mpc
+set runtimepath+=~/.vim/bundle/ctrlp.vim
 
 set noswapfile " .swp is annoying
 set autoindent
@@ -119,9 +127,9 @@ set hidden                          " Allow buffer switching without saving
 set shell=zsh
 set showmode
 set relativenumber
-set tabstop=4           " number of spaces a tab counts for
-set shiftwidth=2        " spaces for autoindents
+set shiftwidth=4        " spaces for autoindents. also for '>> || <<'
 set softtabstop=2
+set tabstop=4
 "set shiftround          " makes indenting a multiple of shiftwidth
 set expandtab           " turn a tab into spaces  let mapleader = ','
 
@@ -148,28 +156,17 @@ inoremap     <silent> <C-l> <C-O>:nohlsearch <bar> redraw<CR>
 inoremap <C-s><C-s> :write<CR>
 " delete word more easily in insert mode
 inoremap <C-BS> <C-W>
-noremap <leader>rf :Autoformat<CR><CR>
+noremap <leader>rf :call MyJSFormat()<CR>
 " brett terpstra's marked 2
 nnoremap mdp :MarkedOpen<CR>
 " for vrc console plugin pop-up buffer
 nnoremap <silent><leader>rq :bdelete __REST_response__<cr>
 
-" https://github.com/junegunn/fzf/wiki/Examples-(vim)
-nnoremap <silent> <Leader>C :call fzf#run({
-            \   'source':
-            \     map(split(globpath(&rtp, "colors/*.vim"), "\n"),
-            \         "substitute(fnamemodify(v:val, ':t'), '\\..\\{-}$', '', '')"),
-            \   'sink':    'colo',
-            \   'options': '+m',
-            \   'left':    30
-            \ })<CR>
-            
-nnoremap <silent> <Leader>r :call fzf#run({
-            \ 'dir': "~/projects/cb/apis",
-            \ 'sink': 'edit',
-            \ 'options': '+m',
-            \ 'left': 30
-            \ })<CR> 
+" reformat JS selection
+vnoremap <C-j> :call MyRangeJSFormat()<CR>
+
+nnoremap <C-p> :CtrlPBuffer<CR>
+nmap <silent> <C-l> <Plug>(jsdoc)
 "}}}
 
 "commands/aliases {{{
@@ -205,7 +202,7 @@ endif
   augroup vrc_autocmds
       autocmd!
       autocmd BufWinEnter __REST_response__ execute "normal! zn"
-      autocmd FileType rest noremap <silent><leader>rr :call RefreshToken()<cr>
+      "" autocmd FileType rest noremap <silent><leader>rr :call RefreshToken()<cr>
   augroup END
   augroup mahTest
       autocmd!
@@ -228,11 +225,14 @@ endif
       autocmd!
       "   autocmd BufWritePost *.js !mocha -C 
        " autocmd BufWritePost *.js !npm test
-       autocmd User Node if &filetype == "javascript" | setlocal expandtab | endif
-       autocmd User Node if &filetype == "javascript" | execute "normal! zn"| endif
-       autocmd User Node if &filetype == "javascript" | noremap <leader><leader>f "normal! ^f'gd"| endif
-       " autocmd FileType javascript set equalprg=:call JsBeautify()<cr>
-       autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr>
+       " autocmd User Node if &filetype == "javascript" | setlocal expandtab | endif
+       " autocmd User Node if &filetype == "javascript" | noremap <leader><leader>f "normal! ^f'gd"| endif
+       autocmd FileType javascript setlocal equalprg=js-beautify\ --stdin 
+       " autocmd FileType javascript noremap <buffer> <c-f> :call MyJSFormat()<cr>
+       " autocmd FileType javascript noremap <buffer>  <C-f> :call JsBeautify()<cr>
+       " autocmd BufWrite if &filetype == "javascript" | :call MyJSFormat() | endif
+       autocmd FileType javascript nmap <C-s>m :SyntasticToggleMode<cr>
+       autocmd FileType javascript nmap <C-s>c :SyntasticCheck<cr>
        autocmd User Node
                    \ if &filetype == "javascript" |
                    \   nmap <buffer> <C-w>f <Plug>NodeVSplitGotoFile |
@@ -242,43 +242,60 @@ endif
                    \ endif
   augroup END
 
-  augroup filetype_rest
-      autocmd!
-      autocmd FileType rest  execute "normal! zn"
-  augroup END
+  " augroup filetype_rest
+  "     autocmd!
+  "     autocmd FileType rest  execute "normal! zn"
+  " augroup END
 
 "}}}
 
 " Functions {{{
 
-
-function! RefreshToken()
-    normal! ^{ 
-    /Authorization: Bearer
-    normal! 3wd$
-    let @a=system('source ~/.zshrc && tokenize')
-    normal! "apkJ2k^
+function! MyJSFormat()
+    call JsBeautify()
+    " jsBeautify doesn't honor spaces before functions, afaik 
+    execute "silent! %s/function(/function (/g"
+    " you have to double escape when using execute
+    execute "silent! %s/function \\([a-zA-Z]\\+\\)(/function \\1 (/g"
+    redraw|echomsg "reformatted."
 endfunction
 
-function! GetCredential()
-    let @a=system('source ~/.zshrc && tokenize')
-    :execute "normal! /Authorization\<cr>3wd$"
-    normal! "apkJ
-    :call VrcQuery()
+function! MyRangeJSFormat()
+    call RangeJsBeautify()
+    " jsBeautify doesn't honor spaces before functions, afaik 
+    execute "silent! s/\\%Vfunction(/function (/g"
+    " you have to double escape when using execute
+    execute "silent! s/\\%V/function \\([a-zA-Z]\\+\\)(/function \\1 (/g"
+    redraw|echomsg "reformatted."
 endfunction
 
-nmap <silent> <C-c><C-j> :call GetCredential()<CR>
-
-function! UnfoldRestResponse()
-    let rstWin = bufnr('__REST_response__')
-    echomsg 'buffer number is: ' rstWin
-    if (bufexists('__REST_response__'))
-        execute "buffer " . rstWin
-        execute "normal! zn"
-    else
-        echomsg 'cannot find buffer: ' . rstWin
-    endif
-endfunction
+" function! RefreshToken()
+"     normal! ^{ 
+"     /Authorization: Bearer
+"     normal! 3wd$
+"     let @a=system('source ~/.zshrc && tokenize')
+"     normal! "apkJ2k^
+" endfunction
+"
+" function! GetCredential()
+"     let @a=system('source ~/.zshrc && tokenize')
+"     :execute "normal! /Authorization\<cr>3wd$"
+"     normal! "apkJ
+"     :call VrcQuery()
+" endfunction
+"
+" nmap <silent> <C-c><C-j> :call GetCredential()<CR>
+"
+" function! UnfoldRestResponse()
+"     let rstWin = bufnr('__REST_response__')
+"     echomsg 'buffer number is: ' rstWin
+"     if (bufexists('__REST_response__'))
+"         execute "buffer " . rstWin
+"         execute "normal! zn"
+"     else
+"         echomsg 'cannot find buffer: ' . rstWin
+"     endif
+" endfunction
 
 function! Urldecode(str)
     let retval = a:str
@@ -422,11 +439,21 @@ nnoremap <leader><C-d> :FufDir!<CR>
 " Buffer Management {{{
 
 " nnoremap <silent><Leader>cb :CommandTBuffer<CR>
-nnoremap <leader>l :bnext<cr>
-nnoremap <leader>j :bprev<cr>
-nnoremap <leader>d :bdelete<cr>
+" use bbye plugin to delete buffer, not window
+nnoremap <leader>q :Bdelete<cr>
 nnoremap <leader>o :only<cr>
-
+" nnoremap <silent> <leader>b :CommandTMRU<CR>
+" el capitan breaks command-t for buffer mgmt
+" rather than fix it now i'll just use ctrlp
+nnoremap <silent> <leader>b :CtrlPBuffer<CR>
+nnoremap <silent> <leader>j :CommandTJump<CR>
+" regular file search
+nnoremap <silent> <leader>f :CommandT<CR>
+" command-T config
+let g:CommandTMaxHeight = 30
+let g:CommandTFileScanner = 'watchman'
+let g:CommandTMaxCachedDirectories = 10
+let g:CommandTSmartCase = 1
 " }}}
 
 " Ags {{{
@@ -448,9 +475,18 @@ let g:notes_directories = ['~/Dropbox/Vim Notes']
 "}}}
 
 " Syntastic{{{
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
 
-let g:syntastic_check_on_open=1
-let g:syntastic_javascript_checkers = ['jshint']
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_javascript_checkers = ['eslint']
+let g:syntastic_javascript_eslint_exe = '/Users/barnold/.nvm/versions/node/v4.2.0/bin/eslint'
+"" i have some js specific autocommands too for Syntastic
+nmap <C-s>i :SyntasticInfo<cr>
 
 "}}}
 "
@@ -472,6 +508,36 @@ nmap <leader>gb :make<CR>
 
 "}}}
 
+" ctrlp {{{
+    let g:ctrlp_match_window = 'top,order:btt,min:1,max:10,results:10'
+    " let g:ctrlp_switch_buffer = 'Et'
+    let g:ctrlp_working_path_mode = 'wr'
+    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+    " ag is fast enough that CtrlP doesn't need to cache
+    let g:ctrlp_use_caching = 0
+" }}}
+
+" FZF {{{
+    set rtp +=~/.vim/bin
+    let g:fzf_launcher = "/Users/barnold/.vim/bin/fzf_term %s"
+    " https://github.com/junegunn/fzf/wiki/Examples-(vim)
+    nnoremap <silent> <Leader>C :call fzf#run({
+                \   'source':
+                \     map(split(globpath(&rtp, "colors/*.vim"), "\n"),
+                \         "substitute(fnamemodify(v:val, ':t'), '\\..\\{-}$', '', '')"),
+                \   'sink':    'colo',
+                \   'options': '+m',
+                \   'left':    30
+                \ })<CR>
+                
+    nnoremap <silent> <Leader>d :call fzf#run({
+                \ 'dir': "~/projects/drive",
+                \ 'sink': 'edit',
+                \ 'options': '+m',
+                \ 'left': 30
+                \ })<CR> 
+
+" }}}
 " vim:filetype=vim sw=4 foldmethod=marker tw=78 expandtab:
 
 
