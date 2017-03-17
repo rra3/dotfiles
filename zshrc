@@ -87,6 +87,10 @@ source $ZSH/oh-my-zsh.sh
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# history
+HISTSIZE=100000
+HISTFILE="$HOME/.zsh_history"
+SAVEHIST=100000
 #zstyle ':completion:*' special-dirs true
 
 # for the love of god and all that is holy
@@ -95,11 +99,23 @@ autoload -U compinit; compinit
 
 bindkey '\C-b' history-beginning-search-backward
 bindkey '\C-f' history-beginning-search-forward
+bindkey 'e^P' history-beginning-search-backward-end
 
 bindkey '^R' history-incremental-search-backward
 bindkey '^S' history-incremental-search-forward
 bindkey '^P' history-search-backward
 bindkey '^N' history-search-forward  
+
+# ...completion stuff
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:descriptions' format '%B%d%b'
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*warnings' format 'No matches for %d'
+zstyle ':completion:*' group-name ''
+# ignore completiion functions for commands you don't have
+# http://grml.org/zsh/zsh-lovers.html
+zstyle ':completion:*:functions' ignored-patterns '_*'
+
 # run vim on a long command line!
 autoload -U edit-command-line
 zle -N edit-command-line
