@@ -53,6 +53,7 @@ Plug 'moll/vim-bbye'
 Plug 'kristijanhusak/vim-hybrid-material'
 Plug 'morhetz/gruvbox'
 Plug 'millermedeiros/vim-esformatter'
+Plug 'HerringtonDarkholme/yats.vim'
 " command-t build function {{{
 function! BuildCommandT(info)
     echomsg "running commandt install function"
@@ -232,6 +233,7 @@ endif
        " autocmd FileType javascript noremap <buffer>  <C-f> :call JsBeautify()<cr>
        " autocmd BufWrite if &filetype == "javascript" | :call MyJSFormat() | endif
        autocmd FileType javascript nmap <C-s>m :SyntasticToggleMode<cr>
+       autocmd FileType typescript execute "normal! zR"
        autocmd FileType javascript nmap <C-s>c :SyntasticCheck<cr>
        autocmd User Node
                    \ if &filetype == "javascript" |
