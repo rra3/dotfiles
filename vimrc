@@ -19,7 +19,6 @@ Plug 'diepm/vim-rest-console'
 Plug 'vim-scripts/L9' | Plug 'vim-scripts/FuzzyFinder'
 Plug 'gregsexton/Atom'
 Plug 'gabesoft/vim-ags'
-Plug 'powerline/powerline', {'rtp': 'powerline/bindings/vim/'}
 Plug 'mattn/gist-vim'
 Plug 'scrooloose/syntastic'
 Plug 'jelera/vim-javascript-syntax'
@@ -67,6 +66,8 @@ endfunction
 
 Plug 'wincent/command-t', { 'do': function('BuildCommandT') }
 Plug 'gilgigilgil/anderson.vim'
+Plug 'tpope/vim-jdaddy'
+Plug 'IN3D/vim-raml'
 call plug#end()
 "}}}
 
@@ -129,7 +130,7 @@ set shell=zsh
 set showmode
 set relativenumber
 set shiftwidth=4        " spaces for autoindents. also for '>> || <<'
-set softtabstop=2
+set softtabstop=4
 set tabstop=4
 "set shiftround          " makes indenting a multiple of shiftwidth
 set expandtab           " turn a tab into spaces  let mapleader = ','
@@ -214,6 +215,13 @@ endif
       autocmd!
       autocmd FileType go execute "normal! zn"
   augroup END
+
+  augroup json
+      autocmd!
+      autocmd FileType json execute "normal! zR"
+  augroup END
+
+  autocmd FileType typescript :set makeprg="/Users/barnold/.nvm/versions/node/v6.10.2/bin/tsc"
 
   " augroup allFiles
   "     autocmd!
@@ -486,7 +494,10 @@ let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_javascript_checkers = ['eslint']
-let g:syntastic_javascript_eslint_exe = '/Users/barnold/.nvm/versions/node/v4.2.0/bin/eslint'
+" let g:syntastic_javascript_eslint_exe = '/Users/barnold/.nvm/versions/node/v4.8.4/bin/eslint'
+" let g:syntastic_javascript_eslint_exe = '/Users/barnold/.nvm/versions/node/v4.2.6/bin/eslint'
+let g:syntastic_javascript_eslint_exe = '/Users/barnold/projects/drive/node_modules/grunt-eslint/node_modules/eslint/bin/eslint.js'
+let g:syntastic_typescript_checkers = ['tslint'] " see tsc output"
 "" i have some js specific autocommands too for Syntastic
 nmap <C-s>i :SyntasticInfo<cr>
 
@@ -539,6 +550,11 @@ nmap <leader>gb :make<CR>
                 \ 'left': 30
                 \ })<CR> 
 
+" }}}
+
+" Python3 Support {{{
+   " let g:python_host_prog = '/usr/local/bin/python3'
+   "  let g:loaded_python3_provider=1
 " }}}
 " vim:filetype=vim sw=4 foldmethod=marker tw=78 expandtab:
 
